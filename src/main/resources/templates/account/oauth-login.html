@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 쿠키에서 특정 이름의 값을 가져오는 함수
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const url = new URL(window.location.href);
+        console.log(url)
+        const urlParams = url.searchParams;
+        const accessToken = urlParams.get('token');
+
+        if(accessToken){
+            localStorage.setItem('CMToken',accessToken);
+        }
+
+        // 쿠키의 값을 localStorage에 저장
+        const CMToken = getCookie('CMToken');
+        if (CMToken) {
+            localStorage.setItem('CMToken', CMToken);
+            console.log(CMToken);
+        } else {
+            console.log('No JWT token found in cookies');
+        }
+        location.href = '/shop';
+    });
+</script>
+</body>
+</html>

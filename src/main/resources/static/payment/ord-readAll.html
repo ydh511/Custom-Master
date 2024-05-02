@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>전체 주문 보기</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+<h1>전체 주문</h1>
+<table id="orders-table">
+    <thead>
+    <tr>
+        <th>주문 ID</th>
+        <th>제품 ID</th>
+        <th>총 가격</th>
+        <th>상태 </th>
+        <th>주문 상세 보기 </th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<a href="/payment/items.html">상품 목록으로</a>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ordersTableBody = document.getElementById('orders-table').getElementsByTagName('tbody')[0];
+
+        fetch('/toss/ord-readAll', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(order => {
+                    const row = document.createElement('tr');
+
+                    const cellOrderId = document.createElement('td');
+                    cellOrderId.innerText = order.id;
+                    row.appendChild(cellOrderId);
+
+                    const cellProductId = document.createElement('td');
+                    cellProductId.innerText = order.productId;
+                    row.appendChild(cellProductId);
+
+                    const cellTotalPrice = document.createElement('td');
+                    cellTotalPrice.innerText = order.totalPrice;
+                    row.appendChild(cellTotalPrice);
+
+                    const cellStatus = document.createElement('td');
+                    cellStatus.innerText = order.status;
+                    row.appendChild(cellStatus);
+
+                    // 각각 ord 하나 읽기 링크 제품 읽는 html : user-ord.html
+                    const cellViewDetails = document.createElement('td');
+                    const link = document.createElement('a');
+                    link.href = `user-ord.html?orderId=${order.id}`;
+                    link.innerText = '상세 보기';
+                    cellViewDetails.appendChild(link);
+                    row.appendChild(cellViewDetails);
+
+                    ordersTableBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('주문 정보를 가져오는 중 오류가 발생했습니다:', error);
+            });
+    });
+</script>
+</body>
+</html>

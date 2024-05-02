@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Details</title>
+    <style>
+        .product-info {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .order-info {
+            display: flex;
+        }
+
+        .product-info p {
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .product-info p:first-child {
+            width: 100px;
+            margin-right: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h2>주문 상세</h2>
+    <hr>
+    <div class="product-info">
+        <p>제품명: [[${product.name}]]</p>
+        <span style="margin-right: 10px;"></span>
+        <p>단가: [[${product.exPrice}]]</p>
+    </div>
+    <hr>
+    <div id="order">
+        <p>주문자: [[${account.name}]]</p>
+        <hr>
+        <div class="order-info">
+            <p>주문 시각: [[${ord.ordTime}]]</p>
+            <span style="margin-right: 30px;"></span>
+            <p>픽업 날짜: [[${ord.pickUpDate}]]</p>
+        </div>
+    </div>
+    <div>
+        <div id="order-status" style="display: flex; align-items: center;">
+            <p style="margin-right: 10px;">주문 상태: [[${ord.status}]]</p>
+            <div th:if="${ord.status.toString() == 'OFFERED'}" style="margin-left: 10px;">
+                <div>
+                    <form id="reject" method="post" th:action="@{/order-accept/__${shopId}__/delete/{orderId}(orderId=${ord.id})}">
+                        <button id="ord-delete">
+                            <label>주문 거절</label>
+                        </button>
+                    </form>
+                </div>
+                <div>
+                    <form id="accept" method="post" th:action="@{/order-accept/__${shopId}__/accept/{orderId}(orderId=${ord.id})}">
+                        <input id="price" name="price" type="text" placeholder="확정 금액을 입력하세요.">
+                        <button id="ord-submit">
+                            <label for="price">submit</label>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:if="${ord.status.toString() == 'CONFIRMED'}">
+        <p>확정 금액: [[${ord.totalPrice}]]</p>
+    </div>
+    <hr>
+    <div>
+        <p>요청 사항</p>
+        <div th:if="${ord.requirements == null or ord.requirements.length() == 0}">
+        <p>요청 사항이 없습니다.</p>
+        </div>
+        <div th:unless="${ord.requirements == null or ord.requirements.length() == 0}">
+            <p>[[${ord.requirements}]]</p>
+        </div>
+    </div>
+    <hr>
+    <div>
+        <img src="${ord.exImagePath}">
+    </div>
+    <hr>
+    <a th:href="@{/order-accept/__${shopId}__/read-all}" style="padding: 5px 10px; background-color: skyblue; color: white; text-decoration: none; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">Back</a>
+    <script>
+        document.getElementById('ord-submit').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('주문이 확정되었습니다.');
+        });
+        document.getElementById('ord-delete').addEventListener('click', function() {
+            alert('주문이 거절되었습니다.');
+        });
+    </script>
+</body>
+</html>

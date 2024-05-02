@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>주문 확인</title>
+    <style>
+        img { width: 100%; max-width: 300px; }
+        .container { padding: 20px; font-family: Arial, sans-serif; }
+        .mb-3 { margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6 p-3">
+            <div id="ord-wrapper">
+                <!-- Image placeholder if needed -->
+                <h1 class="mb-3">상품 ID: <span id="product-id"></span></h1>
+                <p class="mb-3">상품 이름: <span id="product-name"></span></p>
+                <p class="mb-3">가격: <span id="ord-totalPrice"></span></p>
+                <a href="/payment/items.html">상품 목록으로</a>
+                <a href="/payment/ord-readAll.html">주문 전체 목록</a>
+                <a id="pay-link" href="#">결제하기</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const ordId = urlParams.get('orderId');
+
+    if (ordId) {
+        axios.get(`/toss/ord-detail/${ordId}`)
+            .then(response => {
+                const orderDetails = response.data;
+                console.log(orderDetails);
+                document.getElementById('product-id').innerText = orderDetails.productId;
+                document.getElementById('ord-totalPrice').innerText = orderDetails.totalPrice;
+
+                // ord의 status가 PAID라면 결제하기 링크를 안보이도록 설정
+                if (orderDetails.status === 'PAID') {
+                    document.getElementById('pay-link').style.display = 'none';
+                } else {
+                    document.getElementById('pay-link').href = `/payment/item.html?ordId=${ordId}&productId=${orderDetails.productId}`;
+                }
+
+                // 상품 정보를 가져오기 위한 리퀘스트
+                return axios.get(`/toss/product-detail/${orderDetails.productId}`);
+            })
+            .then(productResponse => {
+                const productDetails = productResponse.data;
+                document.getElementById('product-name').innerText = productDetails.name;
+                // 이미지가 있다면 추가할 코드
+                // if (productDetails.imageUrl) {
+                //     document.getElementById('item-image').src = productDetails.imageUrl;
+                // }
+            })
+            .catch(error => {
+                console.error('Failed to load order or product details:', error);
+                alert('주문 또는 제품 세부 정보를 로드할 수 없습니다.');
+            });
+    } else {
+        console.log('Order ID not provided in the URL');
+        alert('URL에 주문 ID가 제공되지 않았습니다.');
+    }
+</script>
+</body>
+</html>

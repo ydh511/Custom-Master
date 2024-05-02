@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ord List</title>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <style>.pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .page-item {
+        margin: 0 5px;
+    }
+
+    .page-link {
+        padding: 5px 10px;
+        background-color: skyblue;
+        border: 1px solid #ccc;
+        text-decoration: none;
+        color: #333;
+    }
+
+    .page-link:hover {
+        background-color: #ccc;
+    }
+    </style>
+</head>
+<body>
+    <h1>[[${account.name}]]님의 주문 목록입니다.</h1>
+    <hr>
+    <div style="display: flex; align-items: center; font-weight: bold;">
+        <p style="width: 100px; margin: 0;">ID</p>
+        <span style="margin-right: 10px;"></span>
+        <p style="width: 100px; margin: 0;">상품명</p>
+        <span style="margin-right: 10px;"></span>
+        <p style="width: 100px; margin: 0">매장명</p>
+        <span style="margin-right: 10px;"></span>
+        <p style="width: 100px; margin: 0;">날짜</p>
+        <span style="margin-right: 10px;"></span>
+        <p style="width: 100px; margin: 0;">상태</p>
+    </div>
+
+    <!-- 주문이 없는 경우 -->
+    <div th:if="${ords.isEmpty()}">
+        <p>요청된 주문이 없습니다.</p>
+        <hr>
+    </div>
+
+    <!-- 주문이 있는 경우 -->
+    <div id="order-list" th:unless="${ords.isEmpty()}" th:each="ord, idx : ${ords}" th:reverse="true" style="margin-bottom: 10px;">
+        <hr>
+        <div style="display: flex; align-items: center;">
+            <p th:text="${ord.id}" style="margin: 0; width: 100px;"></p>
+            <a th:href="@{'/profile/read/' + ${ord.id}}" style="margin-right: 10px;">
+                <p th:text="${names[idx.index]}" style="margin: 0 10px 0 0; width: 100px;"></p>
+            </a>
+            <p th:text="${shops[idx.index]}" style="margin: 0 10px 0 0; width: 100px;"></p>
+            <p th:text="${ord.getOrdTime()}" style="margin: 0 10px 0 0; width: 100px;"></p>
+            <p th:text="${ord.getStatus()}" style="margin: 0;"></p>
+        </div>
+        <!-- body 하단에 read-one.html 처럼 script 추가한다고 가정 -->
+        <div th:if="${ord.status.toString() == 'CONFIRMED'}">
+            <p th:text="${ord.totalPrice}" style="margin: 0 10px 0 0; width: 100px;"></p>
+            <div class="col-lg-6 p-3">
+                <div id="payment-wrapper">
+                    <div id="payment-method"></div>
+                    <div id="agreement"></div>
+                    <div class="p-3 w-100">
+                        <button id="payment-request-button" class="btn btn-primary w-100">결제하기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 페이지 -->
+    <div class="pagination">
+        <!-- 이전 페이지 버튼 -->
+        <div class="page-item">
+            <a class="page-link" href="#" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </div>
+
+        <!-- 페이지 번호 -->
+        <div th:each="page,iterStat : ${ords}">
+            <div class="page-item">
+                <a class="page-link" th:href="@{/profile/ord-list(page=${iterStat.index}, size=${ords.size})}" th:text="${iterStat.index + 1}"></a>
+            </div>
+        </div>
+
+        <div th:if="${ords.isEmpty()}">
+            <a th:href="@{/profile/ord-list}" style="padding: 5px 10px; background-color: skyblue; color: white; text-decoration: none; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">Back</a>
+        </div>
+
+        <!-- 다음 페이지 버튼 -->
+        <div class="page-item">
+            <a class="page-link" href="#" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </div>
+    </div>
+</body>
+
+<script>
+    $(document).ready(function () {
+        const token = localStorage.getItem("CMToken");
+        console.log(token);
+        const headers = {};
+        if (token) {
+            headers["Authorization"] = "Bearer " + token; // 토큰을 Authorization 헤더에 담아 전달
+        }
+        $.ajax({
+            type: "GET",
+            url: `/api/account/authenticated`,
+            headers: headers,
+            contentType: "application/json",
+            success: function () {
+                console.log("성공");
+            },
+            error: function (xhr, status, error) {
+                console.error("need auth");
+            }
+        });
+    });
+</script>
+</html>

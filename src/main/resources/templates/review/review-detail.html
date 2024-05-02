@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Review Detail</title>
+</head>
+<body>
+    <h2>리뷰 상세보기</h2>
+    <div>
+        <p>작성자: [[${account.name}]]</p>
+    </div>
+    <button>
+        <a th:href="@{/review/__${shopId}__/update-view/{reviewId}(reviewId=${review.getId()})}">수정하기</a>
+    </button>
+    <form id="delete" method="post" th:action="@{/review/__${shopId}__/delete/{reviewId}(reviewId=${review.getId()})}">
+        <button>
+            <label>리뷰 삭제</label>
+        </button>
+    </form>
+
+    <hr>
+    <div>
+        <p>[[${review.comment}]]</p>
+    </div>
+    <hr>
+    <a th:href="@{/review/__${shopId}__/read-all}">Back</a>
+</body>
+</html>

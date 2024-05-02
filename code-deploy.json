@@ -1,0 +1,12 @@
+{
+  "applicationName": "boot-github-cicd",
+  "deploymentGroupName": "simple-group",
+  "revision": {
+    "revisionType": "S3",
+    "s3Location": {
+      "bucket": "jisoo-github-artifacts",
+      "key": "codedeploy.zip",
+      "bundleType": "zip"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>header</title>
+</head>
+<body>
+header test!
+</body>
+<script>
+    // 로그인 페이지에서 저장한 토큰을 가져옴
+    const token = localStorage.getItem("CMToken");
+    console.log(token);
+    const headers = {};
+
+    // 토큰이 있으면 헤더에 추가
+    if (token) {
+        headers["Authorization"] = "Bearer " + token; // 토큰을 Authorization 헤더에 담아 전달
+    }
+
+    // 서버에 토큰을 전달하여 프로필 정보 요청
+    $.ajax({
+        type: "GET",
+        url: `/api/account/profile`,
+        beforeSend : function (xhr){
+            xhr.setRequestHeader("Autorization")
+        }
+        headers: headers,
+        contentType: "application/json",
+        success: function (account) {
+        },
+        error: function (xhr, status, error) {
+            console.error("프로필 정보를 가져오는 중 오류가 발생했습니다: " + error);
+        }
+    });
+</script>
+</html>

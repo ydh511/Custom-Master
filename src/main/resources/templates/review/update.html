@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Review Update</title>
+</head>
+<body>
+    <h2>리뷰를 수정하세요.</h2>
+    <p>현재 로그인한 작성자 이름으로 리뷰가 수정됩니다.</p>
+    <form id="review-form" th:action="@{/review/__${shopId}__/update/__${reviewId}__}" method="post">
+        <label for="review-comment">내용 입력:</label>
+        <input type="text" id="review-comment" name="comment" placeholder="리뷰 내용을 입력하세요.">
+        <button type="submit">리뷰 작성</button>
+    </form>
+    <hr>
+    <a th:href="@{/review/__${shopId}__/read-all}">Back</a>
+</body>
+</html>

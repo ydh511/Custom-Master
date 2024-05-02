@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Details</title>
+    <script src="https://js.tosspayments.com/v1/payment-widget"></script>
+    <style>
+        .product-info {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .order-info {
+            display: flex;
+        }
+
+        .product-info p {
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .product-info p:first-child {
+            width: 100px;
+            margin-right: 50px;
+        }
+    </style>
+</head>
+<body>
+<h2>주문 상세</h2>
+<hr>
+<div class="product-info">
+    <p>제품명: [[${product.name}]]</p>
+    <span style="margin-right: 10px;"></span>
+    <p>단가: [[${product.exPrice}]]</p>
+</div>
+<hr>
+<div id="order">
+    <p>주문 매장: [[${shop.name}]]</p>
+    <hr>
+    <div class="order-info">
+        <p>주문 시각: [[${ord.ordTime}]]</p>
+        <span style="margin-right: 30px;"></span>
+        <p>픽업 날짜: [[${ord.pickUpDate}]]</p>
+    </div>
+</div>
+<div>
+    <div id="order-status" style="display: flex; align-items: center;">
+        <p style="margin-right: 10px;">주문 상태: [[${ord.status}]]</p>
+    </div>
+</div>
+<div th:if="${ord.status.toString() == 'CONFIRMED'}">
+    <p>확정 금액: [[${ord.totalPrice}]]</p>
+    <div class="col-lg-6 p-3">
+        <div id="payment-wrapper">
+            <div id="payment-method"></div>
+            <div id="agreement"></div>
+            <div class="p-3 w-100">
+                <button id="payment-request-button" class="btn btn-primary w-100">결제하기</button>
+            </div>
+        </div>
+    </div>
+</div>
+<hr>
+<div>
+    <p>요청 사항</p>
+    <div th:if="${ord.requirements == null or ord.requirements.length() == 0}">
+        <p>요청 사항이 없습니다.</p>
+    </div>
+    <div th:unless="${ord.requirements == null or ord.requirements.length() == 0}">
+        <p>[[${ord.requirements}]]</p>
+    </div>
+</div>
+<hr>
+<div>
+    <img src="${ord.exImagePath}">
+</div>
+
+</body>
+<script>
+    const path = window.location.pathname; // 현재 페이지의 경로를 가져옵니다.
+    const ordId = path.match(/\d+/)[0]; // 경로에서 숫자를 추출합니다.
+
+    console.log('ordId: ' + ordId); // 확인용 로그
+
+    const clientKey = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
+    const paymentWidget = PaymentWidget(clientKey, PaymentWidget.ANONYMOUS);
+    const paymentMethodsWidget = paymentWidget.renderPaymentMethods('#payment-method', {
+        value: [[${ord.totalPrice}]], // 확정 금액을 value로 사용
+        currency: 'KRW',
+        country: 'KR'
+    }, { variantKey: 'DEFAULT'});
+    const paymentAgreement = paymentWidget.renderAgreement('#agreement', { variantKey: 'DEFAULT'});
+    const paymentRequestButton = document.getElementById('payment-request-button');
+    paymentRequestButton.addEventListener('click', () => {
+        try {
+            paymentWidget.requestPayment({
+                orderId: crypto.randomUUID().replaceAll('-',''),
+                // toss 구매 상 정보
+                orderName: `${document.getElementById('product-name')}`,
+            }).then(async data => {
+                const response = await fetch(`/toss/confirm-payment/${ordId}`, { // 백틱 사용
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // 'Authorization': 'Bearer ' + document.getElementById('bearer-input').value,
+                    },
+                    body: JSON.stringify({
+                        paymentKey: data.paymentKey,
+                        orderId: data.orderId,
+                        amount: data.amount
+                    }),
+                })
+                if (response.ok) {
+                    location.pathname = '/payment/success.html'
+                }else {
+                    throw new Error('Payment verification failed.');
+                }
+            });
+        } catch(err) {
+            if (err.code === 'USER_CANCEL') {
+                alert('사용자 결제 취소')
+            }
+            else {
+                alert('Error: ' + err.message);
+            }
+        }
+    });
+</script>
+</html>

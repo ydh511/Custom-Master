@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Review List</title>
+    <style>.pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .page-item {
+        margin: 0 5px;
+    }
+
+    .page-link {
+        padding: 5px 10px;
+        background-color: skyblue;
+        border: 1px solid #ccc;
+        text-decoration: none;
+        color: #333;
+    }
+
+    .page-link:hover {
+        background-color: #ccc;
+    }
+    </style>
+</head>
+<body>
+    <h2>리뷰 목록</h2>
+    <button>
+        <a th:href="@{/review/__${shopId}__/create-view}">리뷰 작성하기</a>
+    </button>
+    <!-- 리뷰가 없는 경우 -->
+    <div th:if="${reviews.isEmpty()}">
+        <hr>
+        <p>작성된 리뷰가 없습니다.</p>
+    </div>
+
+    <!-- 리뷰가 있는 경우 -->
+    <div id="review-list" th:unless="${reviews.isEmpty()}" th:each="review ,idx : ${reviews}">
+        <hr>
+        <div>
+            <a th:href="@{'/review/' + ${shopId} + '/read/' + ${review.getId()}}">
+                <p th:text="${review.getId()}"></p>
+            </a>
+            <p th:text="${names[idx.index]}"></p>
+            <p th:text="${review.getComment()}"></p>
+        </div>
+    </div>
+
+    <!-- 페이지 -->
+    <div class="pagination">
+        <!-- 이전 페이지 버튼 -->
+        <div class="page-item">
+            <a class="page-link" href="#" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </div>
+
+        <!-- 페이지 번호 -->
+        <div th:each="page,iterStat : ${reviews}">
+            <div class="page-item">
+                <a class="page-link" th:href="@{/review/__${shopId}__/read-all(page=${iterStat.index}, size=${reviews.size})}" th:text="${iterStat.index + 1}"></a>
+            </div>
+        </div>
+
+        <div th:if="${reviews.isEmpty()}">
+            <a th:href="@{/review/__${shopId}__/read-all}" style="padding: 5px 10px; background-color: skyblue; color: white; text-decoration: none; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">Back</a>
+        </div>
+
+        <!-- 다음 페이지 버튼 -->
+        <div class="page-item">
+            <a class="page-link" href="#" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

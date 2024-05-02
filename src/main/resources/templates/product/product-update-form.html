@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>상품 수정하기</title>
+  <style>
+      /* body 요소에 대한 스타일링 */
+      body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+      }
+
+      /* 중앙 정렬을 위한 div 요소 */
+      .centered-content {
+          width: 90%; /* 컨테이너 폭 축소 */
+          max-width: 600px; /* 최대 폭 설정 */
+          padding: 50px;
+          font-family: Arial, sans-serif;
+          border-radius: 10px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          background-color: #f9f9f9;
+      }
+
+      .title {
+          text-align: center;
+      }
+
+      input[type="text"],
+      input[type="tel"],
+      input[type="datetime-local"],
+      textarea {
+          width: 100%;
+          padding: 10px;
+          margin: 5px 0;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-sizing: border-box;
+      }
+
+      input[type="file"] {
+          margin-top: 5px;
+      }
+
+      .errorMessage {
+          color: red;
+          font-size: 0.8em;
+      }
+
+      input.errorInput,
+      textarea.errorInput {
+          border: 1px solid red !important;
+      }
+
+      input[type="submit"] {
+          width: 100%;
+          background-color: #007bff;
+          color: white;
+          padding: 14px 20px;
+          margin: 8px 0;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 16px;
+          text-transform: uppercase;
+      }
+
+      input[type="submit"]:hover {
+          background-color: #007bff;
+      }
+
+      input[type="submit"]:focus {
+          outline: none;
+      }
+  </style>
+</head>
+<body>
+<div class="centered-content">
+  <h1 class="title">상품 수정하기</h1>
+  <form action="#" th:action method="POST" enctype="multipart/form-data" th:object="${updateDto}">
+
+    <div>
+      <label for="name">이름:</label>
+      <input type="text" id="name" th:field="*{name}" required th:errorclass="errorInput">
+      <span th:errors="*{name}" class="errorMessage">이름은 필수입니다.</span>
+    </div>
+
+    <div>
+      <label for="exPrice">예시 금액:</label>
+      <input type="text" id="exPrice" th:field="*{exPrice}" required th:errorclass="errorInput">
+      <span th:errors="*{exPrice}" class="errorMessage">예시 금액은 필수입니다.</span>
+    </div>
+
+    <div>
+      <label for="exImage">예시 이미지:</label>
+      <input type="file" id="exImage" name="exImage" accept="image/*">
+    </div>
+
+    <input type="submit" value="수정하기">
+  </form>
+  <form th:action="@{|/shop/${shopId}|}">
+    <input type="submit" value="뒤로가기">
+  </form>
+</div>
+</body>
+</html>

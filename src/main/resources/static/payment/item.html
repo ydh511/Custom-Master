@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="https://js.tosspayments.com/v1/payment-widget"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6 p-3">
+            <div id="product-wrapper">
+                <img class="mb-3 img-fluid" id="item-image">
+                <h1 class="mb-3">상품 이름: <span id="product-name"></span></h1>
+                <p class="mb-3">상품 ID: <span id="product-id"></span></p>
+                <p class="mb-3">가격: <span id="ord-totalPrice"></span></p>
+                <a href="/payment/items.html">상품 목록으로</a>
+                <a href="/payment/ord-readAll.html">주문 전체 목록</a>
+            </div>
+        </div>
+        <div class="col-lg-6 p-3">
+            <div id="payment-wrapper">
+                <div id="payment-method"></div>
+                <div id="agreement"></div>
+                <div class="p-3 w-100">
+                    <button id="payment-request-button" class="btn btn-primary w-100">결제하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const ordId = urlParams.get('ordId');
+    console.log(ordId);
+    const productId = new URLSearchParams(location.search).get('productId');
+
+    const clientKey = 'test_ck_P9BRQmyarYyjO1JwLLbZrJ07KzLN';
+    const paymentWidget = PaymentWidget(clientKey, PaymentWidget.ANONYMOUS);
+    const paymentMethodsWidget = paymentWidget.renderPaymentMethods('#payment-method', {
+        value: 0,
+        currency: 'KRW',
+        country: 'KR'
+    }, { variantKey: 'widgetA'});
+    const paymentAgreement = paymentWidget.renderAgreement('#agreement', { variantKey: 'AGREEMENT'});
+
+    document.getElementById('product-id').textContent = productId;
+
+    const paymentRequestButton = document.getElementById('payment-request-button');
+    paymentRequestButton.addEventListener('click', () => {
+        try {
+            paymentWidget.requestPayment({
+                orderId: crypto.randomUUID().replaceAll('-',''),
+                // toss 구매 상 정보
+                orderName: `${productId}-${document.getElementById('product-name').innerText}`,
+            }).then(async data => {
+                const response = await fetch(`/toss/confirm-payment/${ordId}`, { // 백틱 사용
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // 'Authorization': 'Bearer ' + document.getElementById('bearer-input').value,
+                    },
+                    body: JSON.stringify({
+                        paymentKey: data.paymentKey,
+                        orderId: data.orderId,
+                        amount: data.amount
+                    }),
+                })
+                if (response.ok) {
+                    location.pathname = '/payment/success.html'
+                }else {
+                    throw new Error('Payment verification failed.');
+                }
+            });
+        } catch(err) {
+            if (err.code === 'USER_CANCEL') {
+                alert('사용자 결제 취소')
+            }
+            else {
+                alert('Error: ' + err.message);
+            }
+        }
+    });
+
+
+    fetch(`/items/${productId}`).then(async response => {
+        if (!response.ok) {
+            location.href = '/payment/items.html';
+        }
+        const product = await response.json();
+        document.getElementById('product-name').textContent = product.name;
+        document.getElementById('ord-totalPrice').textContent = product.exPrice;
+        paymentMethodsWidget.updateAmount(product.exPrice);
+    });
+</script>
+</body>
+</html>

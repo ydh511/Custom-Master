@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${readDto.name} + ' - 상점 상세 정보'">상점 상세 정보</title>
+  <style>
+      body {
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          background-color: #f5f5f5;
+          margin: 0;
+          padding: 0;
+      }
+
+      .container {
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #ffffff;
+          border-radius: 5px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          position: relative; /* 수정 및 삭제 버튼 위치 지정을 위한 relative 설정 */
+      }
+
+      h1, h2 {
+          color: #333333;
+          margin-top: 30px; /* 상점 이름과의 간격 조정 */
+          margin-bottom: 30px; /* 상점 이름과의 간격 조정 */
+      }
+
+      a:hover {
+          text-decoration: underline;
+      }
+
+      ul {
+          list-style: none;
+          padding: 0;
+      }
+
+      .product-item, .review-item {
+          border-radius: 5px;
+          padding: 10px;
+          margin-bottom: 20px;
+          border: 1px solid #ddd; /* 테두리 추가 */
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      }
+
+      .product-item:hover, .review-item:hover {
+          background-color: #f9f9f9;
+      }
+
+      button {
+          background-color: #007bff;
+          color: #ffffff;
+          border: none;
+          border-radius: 5px;
+          padding: 8px 16px;
+          cursor: pointer;
+          text-decoration: none;
+          transition: background-color 0.3s ease; /* 배경색 전환 애니메이션 */
+      }
+
+      .edit-delete-buttons {
+          display: flex;
+          gap: 10px;
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          z-index: 1;
+      }
+
+      .edit-button, .delete-button, .request-button {
+          padding: 8px 12px;
+          font-size: 12px;
+      }
+
+      .create-product-button {
+          text-align: right;
+          margin-bottom: 20px;
+      }
+      .create-product-button a {
+          padding: 8px 20px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          text-decoration: none;
+      }
+
+      .button-group {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+      }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 상점 목록 버튼 -->
+  <form th:action="@{/shop}" method="get">
+    <button type="submit" class="shop-list-button">상점 목록</button>
+  </form>
+
+  <!-- 주문 확인하기 수정 및 삭제 버튼 -->
+  <div class="edit-delete-buttons">
+    <form th:action="@{|/order-accept/${shopId}/read-all|}" >
+      <button type="submit" class="edit-button">주문 확인하기</button>
+    </form>
+    <form th:action="@{|/shop/${shopId}/update|}" method="get">
+      <button type="submit" class="edit-button">수정</button>
+    </form>
+    <form th:action="@{|/shop/${shopId}/delete|}" method="post">
+      <button type="submit" class="delete-button">삭제</button>
+    </form>
+  </div>
+
+  <h1 th:text="${readDto.name}">상점 상세 정보</h1>
+
+  <div>
+    <h2>기본 정보</h2>
+    <p><strong>ID:</strong> <span th:text="${readDto.id}">123</span></p>
+    <p><strong>이름:</strong> <span th:text="${readDto.name}">상점 이름</span></p>
+    <p><strong>주소:</strong> <span th:text="${readDto.address}">상점 주소</span></p>
+    <p><strong>전화번호:</strong> <span th:text="${readDto.phoneNumber}">전화번호</span></p>
+  </div>
+
+  <div class="create-product-button">
+    <a th:href="@{|/shop/${shopId}/product/create|}">상품 추가하기</a>
+  </div>
+
+  <div>
+    <h2>상품 목록</h2>
+    <div th:if="${#lists.isEmpty(readDto.productReadDtos)}">
+      <p>상품이 없습니다.</p>
+    </div>
+    <div th:each="product : ${readDto.productReadDtos}" class="product-item">
+      <div>
+        <!-- 상품의 ID와 이름에 링크 추가 -->
+        <p><strong>ID:</strong> <a th:href="@{|/product/${product.id}|}" th:text="${product.id}">product Id</a></p>
+        <p><strong>이름:</strong> <a th:href="@{|/product/${product.id}|}" th:text="${product.name}">product Name</a></p>
+        <p><strong>가격:</strong> <span th:text="${product.price}">Product Price</span></p>
+      </div>
+      <!-- 수정, 삭제, 주문하기 버튼 -->
+      <div class="button-group">
+        <form th:action="@{|/shop/${shopId}/product/${product.id}/update|}" method="get">
+          <button type="submit" class="request-button">수정</button>
+        </form>
+        <form th:action="@{|/shop/${shopId}/product/${product.id}/delete|}" method="post">
+          <button type="submit" class="request-button">삭제</button>
+        </form>
+        <form th:action="@{|/${shopId}/${product.id}/request|}" method="get">
+          <button type="submit" class="request-button">주문하기</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- 최근 5개의 리뷰를 보여준다 -->
+  <br>
+  <!-- 리뷰 리스트로 이동 버튼 -->
+  <form th:action="@{|/review/${shopId}/read-all|}" method="get">
+    <button type="submit" class="write-review-button">리뷰 리스트로 이동</button>
+  </form>
+</div>
+</body>
+</html>
